@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from .comment_model import Comment
 
 class DraftBase(SQLModel):
-    article: str
+    draft: str
     summary: str | None = Field(default=None, nullable=True)
 
 class Draft(BaseUUIDModel, DraftBase, table=True):

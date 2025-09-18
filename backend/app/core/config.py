@@ -41,6 +41,8 @@ class Settings(BaseSettings):
                 path=info.data.get("DATABASE_NAME"),
             )
         return v
+    
+    OPENAI_API_KEY: str
 
     model_config = SettingsConfigDict(case_sensitive=True, env_file="../.env")
 
