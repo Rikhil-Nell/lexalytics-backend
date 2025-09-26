@@ -50,4 +50,5 @@ async def get_comments_by_draft_controller(
     limit: int,
     db: AsyncSession,
 ):
-    return await comment_crud.get_by_draft_id(db, draft_id, limit)
+    comments = await comment_crud.get_by_draft_id(db, draft_id, limit)
+    return comments

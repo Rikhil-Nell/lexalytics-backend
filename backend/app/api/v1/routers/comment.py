@@ -38,4 +38,5 @@ async def get_comments_by_draft(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return await get_comments_by_draft_controller(draft_id, limit, db)
+    comments = await get_comments_by_draft_controller(draft_id, limit, db)
+    return comments

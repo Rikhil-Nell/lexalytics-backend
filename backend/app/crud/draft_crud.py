@@ -27,5 +27,16 @@ class DraftCRUD:
             await db.delete(obj)
             await db.commit()
         return obj
+    
+    async def get_drafts_by_user(
+        self, db: AsyncSession, user_id: UUID, limit: int = 100
+    ):
+        result = await db.exec(
+            select(self.model)
+            .where(self.model.user_id == user_id)
+            .limit(limit)
+            .order_by(self.model.created_at.desc())
+        )
+        return result.all()
 
 draft_crud = DraftCRUD(Draft)
