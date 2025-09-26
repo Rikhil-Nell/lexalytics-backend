@@ -3,9 +3,9 @@ from uuid import UUID
 
 class CommentCreate(BaseModel):
     comment: str
-    sentiment_analysis: str | None
-    sentiment_score: str | None
-    sentiment_keywords: str | None
+    sentiment_analysis: str | None = None
+    sentiment_score: str | None = None
+    sentiment_keywords: str | None = None
 
 class CommentRead(BaseModel):
     id: UUID
