@@ -11,3 +11,4 @@ wheels/
 .env
 connect.ps1
 voiceiq.pem
+.vscode

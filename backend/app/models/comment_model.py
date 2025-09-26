@@ -9,7 +9,9 @@ if TYPE_CHECKING:
 
 class CommentBase(SQLModel):
     comment: str
-    sentiment: str
+    sentiment_analysis: str = Field(default=None, nullable=True)
+    sentiment_score: str = Field(default=None, nullable=True)
+    sentiment_keywords: str = Field(default=None, nullable=True)
 
 class Comment(BaseUUIDModel, CommentBase, table=True):
     __tablename__ = "comments"

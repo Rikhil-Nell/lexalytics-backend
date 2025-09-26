@@ -9,7 +9,7 @@ class DraftCRUD:
         self.model = model
 
     async def create(self, db: AsyncSession, *, obj_in: DraftCreate, user_id: UUID) -> Draft:
-        db_obj = Draft(draft=obj_in["draft"], summary=obj_in["summary"], user_id=user_id)
+        db_obj = Draft(draft=obj_in.draft, summary=obj_in.summary, user_id=user_id)
         db.add(db_obj)
         await db.commit()
         await db.refresh(db_obj)
