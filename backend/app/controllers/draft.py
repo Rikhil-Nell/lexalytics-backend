@@ -5,7 +5,7 @@ from app.utils.agent import summary_agent
 
 async def draft_create(file, db, current_user):
     draft = extract_text_from_pdf(file.file)
-    summary = await summary_agent.run("Execute Summary!")
+    summary = await summary_agent.run(draft)
     draft_in = DraftCreate(draft=draft, summary=summary.output)
     draft = await draft_crud.create(db, obj_in=draft_in, user_id=current_user.id)
     return draft
