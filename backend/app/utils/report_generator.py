@@ -8,8 +8,8 @@ from jinja2 import Template
 import weasyprint
 from io import BytesIO
 
-from ..models.draft_model import Draft
-from ..models.comment_model import Comment
+from app.models.draft_model import Draft
+from app.models.comment_model import Comment
 
 async def generate_draft_report_data(db: AsyncSession, draft_id: UUID, user_id: UUID) -> Dict[str, Any]:
     """Generate report data for a draft"""
