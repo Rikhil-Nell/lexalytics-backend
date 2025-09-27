@@ -38,5 +38,14 @@ class DraftCRUD:
             .order_by(self.model.created_at.desc())
         )
         return result.all()
+    
+    async def get_draft_summary(
+            self, db:AsyncSession, user_id: UUID, draft_id: UUID 
+    ):
+        result = await db.exec(
+            select(self.model.summary)
+            .where(self.model.user_id == user_id, self.model.id == draft_id)
+        )
+        return result.first()
 
 draft_crud = DraftCRUD(Draft)
