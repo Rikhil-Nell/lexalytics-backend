@@ -6,12 +6,16 @@ FROM python:3.13-slim-bookworm AS builder
 
 # Install system dependencies for WeasyPrint
 RUN apt-get update && apt-get install -y \
-    libgobject-2.0-0 \
+    libglib2.0-0 \
     libglib2.0-dev \
+    libcairo2 \
     libcairo2-dev \
+    libpango-1.0-0 \
     libpango1.0-dev \
     libpangocairo-1.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libgdk-pixbuf2.0-dev \
+    libfontconfig1 \
     libfontconfig1-dev \
     shared-mime-info \
     pkg-config \
@@ -43,12 +47,11 @@ FROM python:3.13-slim-bookworm
 
 # Install runtime dependencies for WeasyPrint (lighter than dev packages)
 RUN apt-get update && apt-get install -y \
-    libgobject-2.0-0 \
     libglib2.0-0 \
     libcairo2 \
     libpango-1.0-0 \
     libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf-2.0-0 \
     libfontconfig1 \
     shared-mime-info \
     fonts-dejavu-core \
