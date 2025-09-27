@@ -1,69 +1,74 @@
-# Best practice: A .dockerignore file is crucial for keeping the build context small and fast.
-# Create a .dockerignore file in the same directory with these contents:
-# .venv
-# .git
-# .pytest_cache
-# __pycache__
-# *.pyc
-
+# Best practice: Define uv version as an argument for flexibility and reproducibility
 ARG UV_VERSION=0.7.18
 
-# --- Stage 1: builder - Install dependencies and the project ---
+# Stage 1: builder - for installing dependencies and the project
 FROM python:3.13-slim-bookworm AS builder
 
-# Install build-time system dependencies. 'build-essential' is for compiling C extensions if needed.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+# Install system dependencies for WeasyPrint
+RUN apt-get update && apt-get install -y \
+    libgobject-2.0-0 \
+    libglib2.0-dev \
+    libcairo2-dev \
+    libpango1.0-dev \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf2.0-dev \
+    libfontconfig1-dev \
+    shared-mime-info \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv using the pinned version
+# Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+# Set working directory
 WORKDIR /app
 
-# Copy dependency definition files first for better layer caching
+# Copy only the dependency definition files first for better caching
 COPY pyproject.toml uv.lock ./
 
-# Install project dependencies from the lock file into a virtual environment
+# Install project dependencies
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project --no-editable --compile-bytecode
 
-# Copy the entire backend source code
+# Copy the entire backend source code into the builder stage
+# We copy 'backend' specifically, not everything with '.'
 COPY ./backend /app
 
 # Sync the project itself into the environment
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable --compile-bytecode
 
-# --- Stage 2: final - Create a minimal and secure production image ---
+# Stage 2: final - a minimal image
 FROM python:3.13-slim-bookworm
 
-# <<< FIX: Added WeasyPrint's runtime dependencies here
-# These are the libraries WeasyPrint needs to actually run.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpango-1.0-0 \
-    libcairo2 \
+# Install runtime dependencies for WeasyPrint (lighter than dev packages)
+RUN apt-get update && apt-get install -y \
     libgobject-2.0-0 \
-    curl \
+    libglib2.0-0 \
+    libcairo2 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libgdk-pixbuf2.0-0 \
+    libfontconfig1 \
+    shared-mime-info \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user for security
-RUN useradd --create-home --shell /bin/bash appuser
-
+# Set working directory
 WORKDIR /app
 
-# Copy the virtual environment and source code from the builder stage
-COPY --from=builder --chown=appuser:appuser /app/.venv /app/.venv
-COPY --from=builder --chown=appuser:appuser /app/app /app/app
+# Copy only the virtual environment from the builder stage
+COPY --from=builder /app/.venv /app/.venv
 
-# Switch to the non-root user
-USER appuser
+# Copy the source code from the builder stage
+COPY --from=builder /app/app /app/app
 
+# Ensure the installed binaries are on PATH
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Expose the port
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl --fail http://localhost:8000/health || exit 1
-
+# Start the FastAPI server
+# Your main.py is inside the 'app' directory, so the import path is 'app.main'
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
