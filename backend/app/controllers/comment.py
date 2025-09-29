@@ -29,10 +29,10 @@ async def _process_row(row: dict) -> CommentCreate | None:
     comment_text = row.get("comment")
     if not comment_text:
         return None
-
+    
     # This is the async I/O-bound operation we want to run in parallel
     sentiment = await analysis_agent.run(comment_text)
-
+    print("comment successfully analysed")
     return CommentCreate(
         comment=comment_text,
         sentiment_analysis=sentiment.output.sentiment_analysis,
